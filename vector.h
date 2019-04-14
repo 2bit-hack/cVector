@@ -42,7 +42,7 @@ Vector* vect_createVector() {
 Vector* vect_createVectorWithSize(int size) {
     if(size <= 0) {
         printf("Warning: Size is invalid. Allocating standard memory.");
-        vect_createVector();
+        return vect_createVector();
     }
     Vector* v = (Vector*)malloc(sizeof(Vector));
     v->size = size;
@@ -61,7 +61,7 @@ void vect_insert(Vector* v, int data) {
     }
     else {
         v->size = v->size * 2;
-        v->pool_addr = realloc(v->pool_addr, v->size);
+        v->pool_addr = realloc(v->pool_addr, sizeof(int) * v->size);
         *(v->pool_addr + v->curr_size) = data;
         v->curr_size++;
     }
@@ -78,7 +78,7 @@ int vect_at(Vector* v, int pos) {
 }
 
 // Frees space allocated to the vector
-int vect_clear(Vector* v) {
+void vect_clear(Vector* v) {
     free(v->pool_addr);
     free(v);
 }
