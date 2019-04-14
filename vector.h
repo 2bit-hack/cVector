@@ -60,7 +60,8 @@ void vect_insert(Vector* v, int data) {
         v->curr_size++;
     }
     else {
-        v->pool_addr = realloc(v->pool_addr, v->size *= 2);
+        v->size = v->size * 2;
+        v->pool_addr = realloc(v->pool_addr, v->size);
         *(v->pool_addr + v->curr_size) = data;
         v->curr_size++;
     }
@@ -96,6 +97,14 @@ void DEBUG_printMemAddr(Vector* v) {
 
 void DEBUG_printMemAlloc(Vector* v) {
     printf("Memory allocated in bytes: %lu\n", sizeof(int) * v->size);
+}
+
+void DEBUG_printSize(Vector* v) {
+    printf("Size of vector is: %d\n", v->size);
+}
+
+void DEBUG_printCurrentSize(Vector* v) {
+    printf("Length of vector is: %d\n", v->curr_size);
 }
 
 #endif
