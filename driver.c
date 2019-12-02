@@ -6,7 +6,6 @@ int main() {
     push_back(v, 2);
     push_back(v, 3);
     push_back(v, 4);
-    push_back(v, 5);
     push_back(v, 6);
     push_back(v, 7);
     push_back(v, 8);
@@ -25,9 +24,13 @@ int main() {
     UTIL_print_cVector(v);
     push_back(v, 16);
     UTIL_print_cVector(v);
+    insert(v, at_iter(v, 4), 5);
+    UTIL_print_cVector(v);
     resize_val(v, 20, 100);
     UTIL_print_cVector(v);
     resize(v, 5);
+    UTIL_print_cVector(v);
+    erase(v, at_iter(v, 2));
     UTIL_print_cVector(v);
     v = clear(v);
 }

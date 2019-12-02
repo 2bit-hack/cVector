@@ -3,7 +3,8 @@
 Name :        cVector
 Author :      Soham Kar
 License :     GNU General Public License
-Description : A lightweight implementation of the C++ STL vector for integers
+Description : A lightweight implementation similar to the C++ STL vector for
+integers
 
 */
 
@@ -245,6 +246,24 @@ cVector* clear(cVector* v) {
     v->m_size = 0;
     free(v);
     return NULL;
+}
+
+int* erase(cVector* v, int* pos) {
+    if (pos >= begin(v) && pos < end(v)) {
+        int pos_dist = (pos - begin(v));
+        for (int* i = pos; i < end(v) - 1; i++) {
+            *(i) = *(i + 1);
+        }
+        *(end(v) - 1) = 0;
+        v->m_size--;
+        return (begin(v) + pos_dist);
+    } else if (pos == end(v)) {
+        pop_back(v);
+        return end(v);
+    } else {
+        fprintf(stderr, "ERROR: Iterator Out Of Bounds\n");
+        return NULL;
+    }
 }
 
 #endif // CVECTOR_H_
