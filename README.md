@@ -6,4 +6,5 @@ Please report any bugs, more features coming soon.
 ## Upcoming
 
 - erase_range()
+- shrink_to_fit()
 - API documentation

@@ -50,6 +50,7 @@ int* data(cVector* v);
 int* insert(cVector* v, int* pos, int val);
 int* push_back(cVector* v, int val);
 void pop_back(cVector* v);
+int* erase(cVector* v, int* pos);
 cVector* clear(cVector* v);
 // constructors
 cVector* new_cVector();
