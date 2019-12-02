@@ -1,10 +1,10 @@
 /*
 
 Name :        cVector
-Author :      Soham Kar
-License :     GNU General Public License
-Description : A lightweight implementation similar to the C++ STL vector for
-integers
+Author :      Soham Kar (2bit-hack)
+License :     GNU General Public License v3.0
+Description : A lightweight implementation similar to
+              the C++ STL vector for integers
 
 */
 
@@ -13,6 +13,8 @@ integers
 
 #define DEFAULT_CAPACITY 4
 #define GROWTH_FACTOR 2
+#define ERR -1
+#define ERR_PTR NULL
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -58,6 +60,7 @@ cVector* new_cVector();
 cVector* new_cVector_with_cap(int cap);
 cVector* new_cVector_with_cap_val(int cap, int val);
 
+/* gets new capacity of vector */
 int UTIL_get_new_cap(int capacity) {
     int new_cap = 1;
     while (new_cap < capacity) {
@@ -66,6 +69,7 @@ int UTIL_get_new_cap(int capacity) {
     return new_cap;
 }
 
+/* allocates an empty vector with some capacity */
 cVector* UTIL_allocate(int capacity) {
     cVector* v = (cVector*)malloc(sizeof(cVector));
     v->m_size = 0;
@@ -73,17 +77,19 @@ cVector* UTIL_allocate(int capacity) {
     v->m_data = (int*)calloc(v->m_capacity, sizeof(int));
     if (v->m_data == NULL) {
         free(v);
-        return NULL;
+        return ERR_PTR;
     }
     return v;
 }
 
+/* reallocates existing vector with new capacity */
 cVector* UTIL_reallocate(cVector* v, int new_capacity) {
     v->m_capacity = new_capacity;
     v->m_data = (int*)realloc(v->m_data, v->m_capacity * sizeof(int));
     return v;
 }
 
+/* prints contents of vector, space separated */
 void UTIL_print_cVector(cVector* v) {
     for (int* i = begin(v); i < end(v); i++) {
         printf("%d ", *i);
@@ -91,18 +97,25 @@ void UTIL_print_cVector(cVector* v) {
     printf("\n");
 }
 
+/* prints size, capacity, and data pointer of vector */
 void UTIL_debug_cVector(cVector* v) {
     printf("Size: %d\n", v->m_size);
     printf("Capacity: %d\n", v->m_capacity);
     printf("Data pointer: %p\n", v->m_data);
 }
 
+/* returns current size of vector */
 int size(cVector* v) { return v->m_size; }
 
+/* returns current capacity of vector */
 int capacity(cVector* v) { return v->m_capacity; }
 
+/* returns whether or not vector is empty */
 bool empty(cVector* v) { return (v->m_size == 0 ? true : false); }
 
+/* resizes vector and reallocates if larger than capacity
+   does not reallocate if resized to smaller size than existing capacity
+   destroys elements outside size range */
 void resize(cVector* v, int n) {
     if (n > capacity(v)) {
         v = UTIL_reallocate(v, UTIL_get_new_cap(n));
@@ -129,6 +142,8 @@ void resize(cVector* v, int n) {
     }
 }
 
+/* same as resize, with values to copy
+   if size increases */
 void resize_val(cVector* v, int n, int val) {
     if (n > capacity(v)) {
         v = UTIL_reallocate(v, UTIL_get_new_cap(n));
@@ -155,44 +170,73 @@ void resize_val(cVector* v, int n, int val) {
     }
 }
 
+/* reallocates vector with specified capacity
+   only if n > capacity(v)
+   else does nothing */
 void reserve(cVector* v, int n) {
     if (n > capacity(v)) {
         v = UTIL_reallocate(v, UTIL_get_new_cap(n));
     }
 }
 
+/* reallocates vector to fit according to size
+   as given by the growth rate */
 void shrink_to_fit(cVector* v) {
     v = UTIL_reallocate(v, UTIL_get_new_cap(size(v)));
 }
 
+/* returns iterator to beginning of vector
+   (first element) */
 int* begin(cVector* v) { return v->m_data; }
 
+/* returns iterator to element past the end of the vector
+   (next past last element) */
 int* end(cVector* v) { return (v->m_data + v->m_size); }
 
+/* returns iterator to element at index n */
 int* at_iter(cVector* v, int n) {
     if (n < 0 || n > v->m_size - 1) {
         fprintf(stderr, "ERROR: Index Out Of Bounds\n");
-        return NULL;
+        return ERR_PTR;
     } else {
         return (v->m_data + n);
     }
 }
 
+/* returns element at index n */
 int at(cVector* v, int n) {
     if (n < 0 || n > v->m_size - 1) {
         fprintf(stderr, "ERROR: Index Out Of Bounds\n");
-        return -1;
+        return ERR;
     } else {
         return *(v->m_data + n);
     }
 }
 
-int front(cVector* v) { return *(v->m_data); }
+/* returns first element */
+int front(cVector* v) {
+    if (!empty(v)) {
+        return *(v->m_data);
+    } else {
+        fprintf(stderr, "ERROR: Vector Empty");
+        return ERR;
+    }
+}
 
-int back(cVector* v) { return *(v->m_data + v->m_size); }
+/* returns last element */
+int back(cVector* v) {
+    if (!empty(v)) {
+        return *(v->m_data + v->m_size - 1);
+    } else {
+        fprintf(stderr, "ERROR: Vector Empty");
+        return ERR;
+    }
+}
 
+/* returns reference to underlying array */
 int* data(cVector* v) { return v->m_data; }
 
+/* inserts value at given iterator */
 int* insert(cVector* v, int* pos, int val) {
     if (pos >= begin(v) && pos <= end(v)) {
         int pos_dist = (pos - begin(v));
@@ -208,12 +252,14 @@ int* insert(cVector* v, int* pos, int val) {
         return pos;
     } else {
         fprintf(stderr, "ERROR: Iterator Out Of Bounds\n");
-        return NULL;
+        return ERR_PTR;
     }
 }
 
+/* inserts value at end */
 int* push_back(cVector* v, int val) { return insert(v, end(v), val); }
 
+/* removes value from end */
 void pop_back(cVector* v) {
     if (!empty(v)) {
         *(at_iter(v, size(v) - 1)) = 0;
@@ -221,6 +267,7 @@ void pop_back(cVector* v) {
     }
 }
 
+/* clears contents of vector and returns NULL */
 cVector* clear(cVector* v) {
     free(v->m_data);
     v->m_capacity = 0;
@@ -229,6 +276,7 @@ cVector* clear(cVector* v) {
     return NULL;
 }
 
+/* removes element at given iterator and performs shifting as needed */
 int* erase(cVector* v, int* pos) {
     if (pos >= begin(v) && pos < end(v)) {
         int pos_dist = (pos - begin(v));
@@ -243,23 +291,26 @@ int* erase(cVector* v, int* pos) {
         return end(v);
     } else {
         fprintf(stderr, "ERROR: Iterator Out Of Bounds\n");
-        return NULL;
+        return ERR_PTR;
     }
 }
 
+/* allocates vector with default capacity */
 cVector* new_cVector() {
     return UTIL_allocate(UTIL_get_new_cap(DEFAULT_CAPACITY));
 }
 
+/* allocates vector with given capacity */
 cVector* new_cVector_with_cap(int cap) {
     if (cap > 0)
         return UTIL_allocate(UTIL_get_new_cap(cap));
     else {
         fprintf(stderr, "ERROR: Capacity must be 1 or greater\n");
-        return NULL;
+        return ERR_PTR;
     }
 }
 
+/* allocates vector with given capacity and value */
 cVector* new_cVector_with_cap_val(int cap, int val) {
     if (cap > 0) {
         cVector* v = UTIL_allocate(UTIL_get_new_cap(cap));
@@ -269,7 +320,7 @@ cVector* new_cVector_with_cap_val(int cap, int val) {
         return v;
     } else {
         fprintf(stderr, "ERROR: Capacity must be 1 or greater\n");
-        return NULL;
+        return ERR_PTR;
     }
 }
 

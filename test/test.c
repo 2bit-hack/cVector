@@ -1,4 +1,4 @@
-#include "cvector.h"
+#include "../src/cvector.h"
 
 int main() {
     cVector* v = new_cVector_with_cap(1);
@@ -35,5 +35,12 @@ int main() {
     UTIL_debug_cVector(v);
     shrink_to_fit(v);
     UTIL_debug_cVector(v);
+    insert(v, at_iter(v, 7), 3);
+    UTIL_print_cVector(v);
+    UTIL_debug_cVector(v);
+    erase(v, at_iter(v, 0));
+    UTIL_print_cVector(v);
+    UTIL_debug_cVector(v);
+    printf("%d\n", back(v));
     v = clear(v);
 }
