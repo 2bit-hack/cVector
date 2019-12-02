@@ -32,5 +32,8 @@ int main() {
     UTIL_print_cVector(v);
     erase(v, at_iter(v, 2));
     UTIL_print_cVector(v);
+    UTIL_debug_cVector(v);
+    shrink_to_fit(v);
+    UTIL_debug_cVector(v);
     v = clear(v);
 }

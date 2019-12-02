@@ -37,6 +37,7 @@ bool empty(cVector* v);
 void resize(cVector* v, int n);
 void resize_val(cVector* v, int n, int val);
 void reserve(cVector* v, int n);
+void shrink_to_fit(cVector* v);
 // iterators
 int* begin(cVector* v);
 int* end(cVector* v);
@@ -55,6 +56,7 @@ cVector* clear(cVector* v);
 // constructors
 cVector* new_cVector();
 cVector* new_cVector_with_cap(int cap);
+cVector* new_cVector_with_cap_val(int cap, int val);
 
 int UTIL_get_new_cap(int capacity) {
     int new_cap = 1;
@@ -100,88 +102,6 @@ int size(cVector* v) { return v->m_size; }
 int capacity(cVector* v) { return v->m_capacity; }
 
 bool empty(cVector* v) { return (v->m_size == 0 ? true : false); }
-
-int* begin(cVector* v) { return v->m_data; }
-
-int* end(cVector* v) { return (v->m_data + v->m_size); }
-
-int at(cVector* v, int n) {
-    if (n < 0 || n > v->m_size - 1) {
-        fprintf(stderr, "ERROR: Index Out Of Bounds\n");
-        return -1;
-    } else {
-        return *(v->m_data + n);
-    }
-}
-
-int* at_iter(cVector* v, int n) {
-    if (n < 0 || n > v->m_size - 1) {
-        fprintf(stderr, "ERROR: Index Out Of Bounds\n");
-        return NULL;
-    } else {
-        return (v->m_data + n);
-    }
-}
-
-int front(cVector* v) { return *(v->m_data); }
-
-int back(cVector* v) { return *(v->m_data + v->m_size); }
-
-int* data(cVector* v) { return v->m_data; }
-
-cVector* new_cVector() {
-    return UTIL_allocate(UTIL_get_new_cap(DEFAULT_CAPACITY));
-}
-
-cVector* new_cVector_with_cap(int cap) {
-    if (cap > 0)
-        return UTIL_allocate(UTIL_get_new_cap(cap));
-    else {
-        fprintf(stderr, "ERROR: Capacity must be 1 or greater\n");
-        return NULL;
-    }
-}
-
-cVector* new_cVector_with_cap_val(int cap, int val) {
-    if (cap > 0) {
-        cVector* v = UTIL_allocate(UTIL_get_new_cap(cap));
-        for (int* i = begin(v); i < (begin(v) + cap); i++) {
-            *(i) = val;
-        }
-        return v;
-    } else {
-        fprintf(stderr, "ERROR: Capacity must be 1 or greater\n");
-        return NULL;
-    }
-}
-
-int* insert(cVector* v, int* pos, int val) {
-    if (pos >= begin(v) && pos <= end(v)) {
-        int pos_dist = (pos - begin(v));
-        v->m_size++;
-        if (v->m_size > v->m_capacity) {
-            v = UTIL_reallocate(v, UTIL_get_new_cap(v->m_capacity + 1));
-        }
-        pos = begin(v) + pos_dist;
-        for (int* i = (end(v) - 1); i > pos; i--) {
-            *(i) = *(i - 1);
-        }
-        *(pos) = val;
-        return pos;
-    } else {
-        fprintf(stderr, "ERROR: Iterator Out Of Bounds\n");
-        return NULL;
-    }
-}
-
-int* push_back(cVector* v, int val) { return insert(v, end(v), val); }
-
-void pop_back(cVector* v) {
-    if (!empty(v)) {
-        *(at_iter(v, size(v) - 1)) = 0;
-        v->m_size--;
-    }
-}
 
 void resize(cVector* v, int n) {
     if (n > capacity(v)) {
@@ -241,6 +161,66 @@ void reserve(cVector* v, int n) {
     }
 }
 
+void shrink_to_fit(cVector* v) {
+    v = UTIL_reallocate(v, UTIL_get_new_cap(size(v)));
+}
+
+int* begin(cVector* v) { return v->m_data; }
+
+int* end(cVector* v) { return (v->m_data + v->m_size); }
+
+int* at_iter(cVector* v, int n) {
+    if (n < 0 || n > v->m_size - 1) {
+        fprintf(stderr, "ERROR: Index Out Of Bounds\n");
+        return NULL;
+    } else {
+        return (v->m_data + n);
+    }
+}
+
+int at(cVector* v, int n) {
+    if (n < 0 || n > v->m_size - 1) {
+        fprintf(stderr, "ERROR: Index Out Of Bounds\n");
+        return -1;
+    } else {
+        return *(v->m_data + n);
+    }
+}
+
+int front(cVector* v) { return *(v->m_data); }
+
+int back(cVector* v) { return *(v->m_data + v->m_size); }
+
+int* data(cVector* v) { return v->m_data; }
+
+int* insert(cVector* v, int* pos, int val) {
+    if (pos >= begin(v) && pos <= end(v)) {
+        int pos_dist = (pos - begin(v));
+        v->m_size++;
+        if (v->m_size > v->m_capacity) {
+            v = UTIL_reallocate(v, UTIL_get_new_cap(v->m_capacity + 1));
+        }
+        pos = begin(v) + pos_dist;
+        for (int* i = (end(v) - 1); i > pos; i--) {
+            *(i) = *(i - 1);
+        }
+        *(pos) = val;
+        return pos;
+    } else {
+        fprintf(stderr, "ERROR: Iterator Out Of Bounds\n");
+        return NULL;
+    }
+}
+
+int* push_back(cVector* v, int val) { return insert(v, end(v), val); }
+
+void pop_back(cVector* v) {
+    if (!empty(v)) {
+        *(at_iter(v, size(v) - 1)) = 0;
+        v->m_size--;
+    }
+}
+
 cVector* clear(cVector* v) {
     free(v->m_data);
     v->m_capacity = 0;
@@ -263,6 +243,32 @@ int* erase(cVector* v, int* pos) {
         return end(v);
     } else {
         fprintf(stderr, "ERROR: Iterator Out Of Bounds\n");
+        return NULL;
+    }
+}
+
+cVector* new_cVector() {
+    return UTIL_allocate(UTIL_get_new_cap(DEFAULT_CAPACITY));
+}
+
+cVector* new_cVector_with_cap(int cap) {
+    if (cap > 0)
+        return UTIL_allocate(UTIL_get_new_cap(cap));
+    else {
+        fprintf(stderr, "ERROR: Capacity must be 1 or greater\n");
+        return NULL;
+    }
+}
+
+cVector* new_cVector_with_cap_val(int cap, int val) {
+    if (cap > 0) {
+        cVector* v = UTIL_allocate(UTIL_get_new_cap(cap));
+        for (int* i = begin(v); i < (begin(v) + cap); i++) {
+            *(i) = val;
+        }
+        return v;
+    } else {
+        fprintf(stderr, "ERROR: Capacity must be 1 or greater\n");
         return NULL;
     }
 }
