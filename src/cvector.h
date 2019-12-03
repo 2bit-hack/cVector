@@ -123,7 +123,7 @@ void resize(cVector* v, int n) {
             *(i) = 0;
         }
         v->m_size = n;
-    } else if (n > size(v)) {
+    } else if (n >= size(v)) {
         for (int* i = end(v); i < (begin(v) + n); i++) {
             *(i) = 0;
         }
@@ -151,7 +151,7 @@ void resize_val(cVector* v, int n, int val) {
             *(i) = val;
         }
         v->m_size = n;
-    } else if (n > size(v)) {
+    } else if (n >= size(v)) {
         for (int* i = end(v); i < (begin(v) + n); i++) {
             *(i) = val;
         }

@@ -42,5 +42,14 @@ int main() {
     UTIL_print_cVector(v);
     UTIL_debug_cVector(v);
     printf("%d\n", back(v));
+    resize(v, 4);
+    UTIL_print_cVector(v);
+    UTIL_debug_cVector(v);
+    resize(v, 2);
+    UTIL_print_cVector(v);
+    UTIL_debug_cVector(v);
+    resize(v, 7);
+    UTIL_print_cVector(v);
+    UTIL_debug_cVector(v);
     v = clear(v);
 }
