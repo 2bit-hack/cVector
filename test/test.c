@@ -1,5 +1,7 @@
 #include "../src/cvector.h"
 
+// TODO: use tests, check edge cases
+
 int main() {
     cVector* v = new_cVector_with_cap(1);
     push_back(v, 1);

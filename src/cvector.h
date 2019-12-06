@@ -72,9 +72,14 @@ int UTIL_get_new_cap(int capacity) {
 /* allocates an empty vector with some capacity */
 cVector* UTIL_allocate(int capacity) {
     cVector* v = (cVector*)malloc(sizeof(cVector));
-    v->m_size = 0;
-    v->m_capacity = capacity;
-    v->m_data = (int*)calloc(v->m_capacity, sizeof(int));
+    if (v) {
+        v->m_size = 0;
+        v->m_capacity = capacity;
+        v->m_data = (int*)calloc(v->m_capacity, sizeof(int));
+    } else {
+        fprintf(stderr, "ERROR: Failed to allocate memory\n");
+        return ERR_PTR;
+    }
     if (v->m_data == NULL) {
         free(v);
         return ERR_PTR;
@@ -82,10 +87,19 @@ cVector* UTIL_allocate(int capacity) {
     return v;
 }
 
-/* reallocates existing vector with new capacity */
+/* reallocates existing vector with new capacity
+   if it fails, it returns the original vector unchanged */
 cVector* UTIL_reallocate(cVector* v, int new_capacity) {
+    int prev_cap = v->m_capacity;
     v->m_capacity = new_capacity;
-    v->m_data = (int*)realloc(v->m_data, v->m_capacity * sizeof(int));
+    int* new_data = (int*)realloc(v->m_data, v->m_capacity * sizeof(int));
+    if (new_data) {
+        v->m_data = new_data;
+    } else {
+        fprintf(stderr, "ERROR: Failed to reallocate memory\n");
+        v->m_capacity = prev_cap;
+        return v;
+    }
     return v;
 }
 
@@ -242,7 +256,13 @@ int* insert(cVector* v, int* pos, int val) {
         int pos_dist = (pos - begin(v));
         v->m_size++;
         if (v->m_size > v->m_capacity) {
+            int prev_cap = v->m_capacity;
             v = UTIL_reallocate(v, UTIL_get_new_cap(v->m_capacity + 1));
+            // this implies UTIL_reallocate() failed
+            if (v->m_capacity == prev_cap) {
+                fprintf(stderr, "ERROR: Failed to insert\n");
+                return ERR_PTR;
+            }
         }
         pos = begin(v) + pos_dist;
         for (int* i = (end(v) - 1); i > pos; i--) {
